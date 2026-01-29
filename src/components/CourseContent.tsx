@@ -148,18 +148,26 @@ const CourseContent = () => {
           </div>
         </section>
 
-        <section aria-label="Current module">
-          <h2 className="sectionTitle">Current Module</h2>
+        <section aria-label="Course information">
+          <h2 className="sectionTitle">Course Information</h2>
           <div className="card">
-            <h3 className="moduleTitle">Module 3: Supervised Learning Fundamentals</h3>
+            <h3 className="moduleTitle">About this course</h3>
             <p className="moduleDesc">
-              Learn the core concepts of supervised learning, including regression and classification algorithms.
-              Understand how to train models using labeled data and evaluate their performance.
+              Machine Learning (ML) is a field of AI that enables computers to learn patterns from data and make predictions or decisions
+              without being explicitly programmed. In this course, you will build a strong foundation in supervised learning, with practical
+              experience in regression and classification.
+
+              You will learn how to prepare datasets, engineer features, split data correctly (train/validation/test), and train baseline models.
+              The course also emphasizes how to evaluate models using the right metrics (MSE/MAE for regression; accuracy, precision, recall,
+              and F1-score for classification) and how to avoid common issues like overfitting and data leakage.
+
+              Course contents include: supervised learning basics, regression analysis, classification algorithms, evaluation metrics, and
+              regularization techniques. The module list below provides the structured learning path and practice activities.
             </p>
             <div className="moduleMeta">
               <div className="metaItem">
                 <Clock size={16} />
-                <span>2.5 hours</span>
+                <span>Estimated study time: 12 hours/week</span>
               </div>
               <div className="metaItem">
                 <User size={16} />
