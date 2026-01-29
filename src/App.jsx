@@ -1,16 +1,8 @@
-import CourseContent from './components/CourseContent'
-import ChatInterface from './components/ChatInterface'
 import './App.css'
+import Index from './pages/index.tsx'
 
 function App() {
-  return (
-    <>
-      <div className="app-layout">
-        <CourseContent />
-        <ChatInterface />
-      </div>
-    </>
-  )
+  return <Index />
 }
 
 export default App

@@ -1,0 +1,463 @@
+:root {
+  --app-bg: #f5f6f8;
+  --surface-0: #f5f6f8;
+  --surface-1: #ffffff;
+  --text-0: #111827;
+  --text-1: #374151;
+  --text-2: #6b7280;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --primary: #2563eb;
+  --primary-100: #dbeafe;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.coursePage {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  background: var(--surface-0);
+}
+
+.courseHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+}
+
+.courseHeaderInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.breadcrumbs {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 24px 0 24px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.courseTitleBlock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.courseIconBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #eef2ff;
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.courseTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  color: var(--text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.courseMeta {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.coursePill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px 24px 28px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-0);
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.progressLabel {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text-0);
+}
+
+.progressValue {
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+.moduleTitle {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-0);
+}
+
+.moduleDesc {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-1);
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.moduleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.listItem:hover {
+  background: #f9fafb;
+  border-color: var(--border-strong);
+}
+
+.listLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.badgeNumber {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 750;
+  flex-shrink: 0;
+}
+
+.badgeDone {
+  background: var(--primary);
+  color: white;
+}
+
+.badgeTodo {
+  background: #e5e7eb;
+  color: var(--text-1);
+}
+
+.itemText {
+  min-width: 0;
+}
+
+.itemTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: #9ca3af;
+}
+
+.objectiveList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.objectiveItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--text-1);
+}
+
+.objectiveIndex {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--primary-100);
+  color: #1d4ed8;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 750;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.assessmentGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .assessmentGrid {
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+      "assignments breakdown"
+      "assignments final"
+      "assignments grading";
+    align-items: start;
+  }
+}
+
+.assessmentAssignments {
+  grid-area: assignments;
+}
+
+.assessmentBreakdown {
+  grid-area: breakdown;
+}
+
+.assessmentFinal {
+  grid-area: final;
+}
+
+.assessmentGrading {
+  grid-area: grading;
+}
+
+.assessmentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.assessmentTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 750;
+  color: var(--text-0);
+}
+
+.mutedText {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.markTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.noteBox {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+}
+
+.noteTitle {
+  font-size: 14px;
+  font-weight: 750;
+  color: #1d4ed8;
+  margin-bottom: 4px;
+}
+
+.noteText {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.assessmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.assessmentItem {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fafafa;
+}
+
+.assessmentItemTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.assessmentItemName {
+  font-size: 14px;
+  font-weight: 750;
+  color: var(--text-0);
+  line-height: 1.35;
+}
+
+.assessmentItemIntro {
+  font-size: 14px;
+  color: var(--text-1);
+  line-height: 1.55;
+}
+
+.tableWrap {
+  margin-top: 10px;
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.gradingTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-1);
+}
+
+.gradingTable th,
+.gradingTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 14px;
+}
+
+.gradingTable th {
+  background: #f9fafb;
+  color: var(--text-1);
+  font-weight: 750;
+}
+
+.gradingTable tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .courseHeaderInner {
+    padding: 12px 16px;
+  }
+  .breadcrumbs {
+    padding: 10px 16px 0 16px;
+  }
+  .main {
+    padding: 16px;
+  }
+  .coursePill {
+    display: none;
+  }
+}

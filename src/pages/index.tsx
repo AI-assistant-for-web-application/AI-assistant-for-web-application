@@ -1,8 +1,10 @@
-import CourseContent from "@/components/CourseContent";
+import CourseContent from "../components/CourseContent";
+
+import "./index.css";
 
 const Index = () => {
   return (
-    <div className="flex h-screen bg-background">
+    <div className="pageShell">
       {/* Course Content - Left Side */}
       <CourseContent />
 
