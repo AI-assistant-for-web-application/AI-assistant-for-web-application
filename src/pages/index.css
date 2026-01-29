@@ -1,0 +1,5 @@
+.pageShell {
+  min-height: 100vh;
+  display: flex;
+  background: var(--app-bg, #f5f6f8);
+}
