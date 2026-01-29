@@ -1,10 +1,14 @@
 import CourseContent from './components/CourseContent'
+import ChatInterface from './components/ChatInterface'
 import './App.css'
 
 function App() {
   return (
     <>
-      <CourseContent />
+      <div className="app-layout">
+        <CourseContent />
+        <ChatInterface />
+      </div>
     </>
   )
 }

@@ -5,6 +5,19 @@
   text-align: center;
 }
 
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
