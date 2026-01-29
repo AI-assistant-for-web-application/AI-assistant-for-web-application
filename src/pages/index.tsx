@@ -1,4 +1,4 @@
-import CourseContent from "@/components/CourseContent";
+import CourseContent from "../components/CourseContent";
 
 const Index = () => {
   return (
