@@ -292,6 +292,160 @@
   margin-top: 1px;
 }
 
+.assessmentGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .assessmentGrid {
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+      "assignments breakdown"
+      "assignments final"
+      "assignments grading";
+    align-items: start;
+  }
+}
+
+.assessmentAssignments {
+  grid-area: assignments;
+}
+
+.assessmentBreakdown {
+  grid-area: breakdown;
+}
+
+.assessmentFinal {
+  grid-area: final;
+}
+
+.assessmentGrading {
+  grid-area: grading;
+}
+
+.assessmentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.assessmentTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 750;
+  color: var(--text-0);
+}
+
+.mutedText {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.markTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.noteBox {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+}
+
+.noteTitle {
+  font-size: 13px;
+  font-weight: 750;
+  color: #1d4ed8;
+  margin-bottom: 4px;
+}
+
+.noteText {
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.assessmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.assessmentItem {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fafafa;
+}
+
+.assessmentItemTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.assessmentItemName {
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--text-0);
+  line-height: 1.35;
+}
+
+.assessmentItemIntro {
+  font-size: 13px;
+  color: var(--text-1);
+  line-height: 1.55;
+}
+
+.tableWrap {
+  margin-top: 10px;
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.gradingTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-1);
+}
+
+.gradingTable th,
+.gradingTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 13px;
+}
+
+.gradingTable th {
+  background: #f9fafb;
+  color: var(--text-1);
+  font-weight: 750;
+}
+
+.gradingTable tr:last-child td {
+  border-bottom: none;
+}
+
 @media (max-width: 640px) {
   .courseHeaderInner {
     padding: 12px 16px;
