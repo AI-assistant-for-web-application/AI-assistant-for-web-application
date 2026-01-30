@@ -12,6 +12,7 @@ const CourseContent = () => {
     progress: 65,
   };
 
+  
   const assessments = {
     assignments: [
       {
