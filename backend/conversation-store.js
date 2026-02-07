@@ -66,10 +66,49 @@ export const getMessages = (conversationId) => {
   return messageStore[conversationId] || [];
 };
 
+// Search messages by keyword
+export const searchMessages = (conversationId, keyword) => {
+  const messages = messageStore[conversationId] || [];
+  const lowerKeyword = keyword.toLowerCase();
+
+  return messages.filter((msg) => msg.text.toLowerCase().includes(lowerKeyword));
+};
+
+// Search across all conversations
+export const searchAllMessages = (userId, keyword) => {
+  const userConversations = getUserConversations(userId);
+  const results = [];
+
+  userConversations.forEach((conv) => {
+    const messages = searchMessages(conv.id, keyword);
+    if (messages.length > 0) {
+      results.push({
+        conversationId: conv.id,
+        title: conv.title,
+        matches: messages.length,
+        messages,
+      });
+    }
+  });
+
+  return results;
+};
+
+// Delete conversation
+export const deleteConversation = (conversationId) => {
+  delete conversations[conversationId];
+  delete messageStore[conversationId];
+  console.log(`[Store] Deleted conversation: ${conversationId}`);
+  return true;
+};
+
 export default {
   createConversation,
   getConversation,
   getUserConversations,
   addMessage,
   getMessages,
+  searchMessages,
+  searchAllMessages,
+  deleteConversation,
 };
