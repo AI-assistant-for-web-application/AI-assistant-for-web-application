@@ -102,6 +102,84 @@ export const deleteConversation = (conversationId) => {
   return true;
 };
 
+// Export conversation as JSON
+export const exportConversation = (conversationId) => {
+  const conversation = getConversation(conversationId);
+  const messages = getMessages(conversationId);
+
+  if (!conversation) {
+    return null;
+  }
+
+  return {
+    conversation,
+    messages,
+    exportedAt: new Date().toISOString(),
+  };
+};
+
+// Export conversation as formatted text
+export const exportConversationAsText = (conversationId) => {
+  const conversation = getConversation(conversationId);
+  const messages = getMessages(conversationId);
+
+  if (!conversation) {
+    return null;
+  }
+
+  let text = `Conversation: ${conversation.title}\n`;
+  text += `Course: ${conversation.courseCode}\n`;
+  text += `Module: ${conversation.moduleName}\n`;
+  text += `Created: ${conversation.createdAt}\n`;
+  text += `Messages: ${conversation.messageCount}\n`;
+  text += `\n${"=".repeat(60)}\n\n`;
+
+  messages.forEach((msg) => {
+    const sender = msg.sender === "user" ? "You" : "Assistant";
+    const time = new Date(msg.timestamp).toLocaleTimeString();
+    text += `[${time}] ${sender}:\n${msg.text}\n\n`;
+
+    if (msg.tokens) {
+      text += `  Tokens: ${msg.tokens.total} | Response: ${msg.responseTime}ms\n\n`;
+    }
+  });
+
+  return text;
+};
+
+// Get conversation statistics
+export const getConversationStats = (conversationId) => {
+  const conversation = getConversation(conversationId);
+  const messages = getMessages(conversationId);
+
+  if (!conversation) {
+    return null;
+  }
+
+  const userMessages = messages.filter((m) => m.sender === "user");
+  const assistantMessages = messages.filter((m) => m.sender === "assistant");
+  const totalTokens = assistantMessages.reduce((sum, msg) => sum + (msg.tokens?.total || 0), 0);
+  const totalTime = assistantMessages.reduce((sum, msg) => sum + (msg.responseTime || 0), 0);
+
+  return {
+    conversationId,
+    title: conversation.title,
+    createdAt: conversation.createdAt,
+    updatedAt: conversation.updatedAt,
+    totalMessages: messages.length,
+    userMessages: userMessages.length,
+    assistantMessages: assistantMessages.length,
+    totalTokens,
+    totalTime,
+    averageTokensPerResponse:
+      assistantMessages.length > 0
+        ? Math.round(totalTokens / assistantMessages.length)
+        : 0,
+    averageResponseTime:
+      assistantMessages.length > 0 ? Math.round(totalTime / assistantMessages.length) : 0,
+  };
+};
+
 export default {
   createConversation,
   getConversation,
@@ -111,4 +189,7 @@ export default {
   searchMessages,
   searchAllMessages,
   deleteConversation,
+  exportConversation,
+  exportConversationAsText,
+  getConversationStats,
 };
