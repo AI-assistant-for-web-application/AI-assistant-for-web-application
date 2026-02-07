@@ -17,7 +17,6 @@ export const createConversation = (userId, courseCode, moduleName) => {
     title: `${courseCode}: ${moduleName}`,
   };
 
-  // Messages will be added in a later stage
   messageStore[conversationId] = [];
 
   console.log(`[Store] Created conversation: ${conversationId}`);
@@ -34,8 +33,43 @@ export const getUserConversations = (userId) => {
   return Object.values(conversations).filter((conv) => conv.userId === userId);
 };
 
+// Add message to conversation
+export const addMessage = (conversationId, message, sender, tokens = null, responseTime = null) => {
+  if (!messageStore[conversationId]) {
+    messageStore[conversationId] = [];
+  }
+
+  const messageRecord = {
+    id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    conversationId,
+    sender,
+    text: message,
+    timestamp: new Date().toISOString(),
+    tokens,
+    responseTime,
+  };
+
+  messageStore[conversationId].push(messageRecord);
+
+  // Update conversation metadata
+  if (conversations[conversationId]) {
+    conversations[conversationId].updatedAt = new Date().toISOString();
+    conversations[conversationId].messageCount = messageStore[conversationId].length;
+  }
+
+  console.log(`[Store] Added message to ${conversationId}`);
+  return messageRecord;
+};
+
+// Get messages from conversation
+export const getMessages = (conversationId) => {
+  return messageStore[conversationId] || [];
+};
+
 export default {
   createConversation,
   getConversation,
   getUserConversations,
+  addMessage,
+  getMessages,
 };
