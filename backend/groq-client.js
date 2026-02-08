@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import axios from "axios";
+import { buildSystemPrompt } from "./prompt-templates.js";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -34,7 +35,12 @@ export const resetTokenStats = () => {
   };
 };
 
-export const callGroqAPI = async (userMessage, courseContext = "") => {
+export const callGroqAPI = async (
+  userMessage,
+  courseCode = "CS 229",
+  moduleKey = "default", 
+  courseContext = ""
+) => {
   const startTime = performance.now();
 
   try {
@@ -47,11 +53,12 @@ export const callGroqAPI = async (userMessage, courseContext = "") => {
       throw new Error("User message cannot be empty");
     }
 
-    // Create system prompt with course context
-    const systemPrompt = `You are a helpful course assistant for students. 
-You help students understand course concepts, answer questions about the material, and provide explanations.
-Be concise but thorough in your responses.
-${courseContext ? `Current course context: ${courseContext}` : ""}`;
+    // Build enhance system prompt from template
+    const systemPrompt = buildSystemPrompt(courseCode, moduleKey, courseContext);
+
+    console.log(
+      `[Groq] Processing message for ${courseCode} - ${moduleKey}: "${userMessage.substring(0, 50)}..."`
+    )
 
    // Make request to Groq API
     const response = await axios.post(
@@ -98,7 +105,7 @@ ${courseContext ? `Current course context: ${courseContext}` : ""}`;
     tokenStats.requestCount += 1;
 
     console.log(
-      `[Groq] ✓ Response received (${responseTime}ms) - Tokens: ${totalTokens} (Prompt: ${promptTokens}, Completion: ${completionTokens})`
+      `[Groq] ✓ Response received (${responseTime}ms) - Module: ${moduleKey} - Tokens: ${totalTokens}`
     );
 
     return {
