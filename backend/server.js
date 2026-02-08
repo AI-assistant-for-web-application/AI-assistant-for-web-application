@@ -62,6 +62,7 @@ app.post("/api/chat", async (req, res) => {
       courseId: courseId || "general",
       timestamp: new Date(),
       tokens: result.tokens || null,
+      stats: result.stats || null,
     });
   } catch (error) {
     console.error("Server error:", error);
