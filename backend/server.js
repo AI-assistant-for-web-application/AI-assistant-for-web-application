@@ -8,7 +8,12 @@ import {
   getConversation,
   getUserConversations,
   getMessages,
+  searchMessages,
+  searchAllMessages,
   deleteConversation,
+  exportConversation,
+  exportConversationAsText,
+  getConversationStats,
 } from "./conversation-store.js";
 
 // Load environment variables
@@ -114,6 +119,145 @@ app.get("/api/conversations/user/:userId", (req, res) => {
   }
 });
 
+// Search messages in conversation
+app.get("/api/conversations/:conversationId/search", (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { keyword } = req.query;
+
+    if (!keyword) {
+      return res.status(400).json({
+        success: false,
+        error: "keyword parameter is required",
+      });
+    }
+
+    const results = searchMessages(conversationId, keyword);
+
+    res.json({
+      success: true,
+      keyword,
+      matches: results.length,
+      results,
+    });
+  } catch (error) {
+    console.error("Error searching messages:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to search messages",
+    });
+  }
+});
+
+// Search across all conversations
+app.get("/api/search", (req, res) => {
+  try {
+    const { userId, keyword } = req.query;
+
+    if (!userId || !keyword) {
+      return res.status(400).json({
+        success: false,
+        error: "userId and keyword are required",
+      });
+    }
+
+    const results = searchAllMessages(userId, keyword);
+
+    res.json({
+      success: true,
+      keyword,
+      conversations: results.length,
+      results,
+    });
+  } catch (error) {
+    console.error("Error searching:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to search",
+    });
+  }
+});
+
+// Get conversation statistics
+app.get("/api/conversations/:conversationId/stats", (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const stats = getConversationStats(conversationId);
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        error: "Conversation not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      stats,
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch statistics",
+    });
+  }
+});
+
+// Export conversation (JSON)
+app.get("/api/conversations/:conversationId/export", (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const data = exportConversation(conversationId);
+
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        error: "Conversation not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error("Error exporting conversation:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to export conversation",
+    });
+  }
+});
+
+// Export conversation (Text)
+app.get("/api/conversations/:conversationId/export/text", (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const text = exportConversationAsText(conversationId);
+
+    if (!text) {
+      return res.status(404).json({
+        success: false,
+        error: "Conversation not found",
+      });
+    }
+
+    res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Content-Disposition", `attachment; filename="conversation-${conversationId}.txt"`);
+    res.send(text);
+  } catch (error) {
+    console.error("Error exporting conversation:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to export conversation",
+    });
+  }
+});
+
 // Chat endpoint
 app.post("/api/chat", async (req, res) => {
   try {
@@ -143,7 +287,6 @@ app.post("/api/chat", async (req, res) => {
       courseId: courseId || "general",
       timestamp: new Date(),
       tokens: result.tokens || null,
-      stats: result.stats || null,
     });
   } catch (error) {
     console.error("Server error:", error);
