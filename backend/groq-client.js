@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
 import axios from "axios";
-import { buildSystemPrompt } from "./prompt-templates.js";
+import { 
+  buildSystemPrompt,
+  getRelevantFollowUpQuestion,
+} from "./prompt-templates.js";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -105,6 +108,10 @@ export const callGroqAPI = async (
     tokenStats.totalPromptTokens += promptTokens;
     tokenStats.totalCompletionTokens += completionTokens;
     tokenStats.requestCount += 1;
+
+
+    //Get follow-up question suggestion
+    const followUpQuestions = getRelevantFollowUpQuestion(moduleKey);
 
     console.log(
       `[Groq] ✓ Response received (${responseTime}ms) - Module: ${moduleKey} - Tokens: ${totalTokens}`

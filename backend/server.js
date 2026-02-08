@@ -317,6 +317,8 @@ app.post("/api/chat", async (req, res) => {
       tokens: result.tokens || null,
       quality: result.quality || null,
       responseTime: result.responseTime,
+      followUpQuestion: result.followUpQuestion || null,
+      stats : result.stats || null,
     });
   } catch (error) {
     console.error("Server error:", error);
