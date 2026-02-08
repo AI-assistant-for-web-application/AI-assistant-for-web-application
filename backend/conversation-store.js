@@ -1,6 +1,51 @@
+import fs from "fs/promises";
+import path from "path";
+
 // In-memory store (production would use database)
 let conversations = {};
 let messageStore = {};
+
+const DATA_DIR = "./data";
+const CONVERSATIONS_FILE = path.join(DATA_DIR, "conversations.json");
+const MESSAGES_FILE = path.join(DATA_DIR, "messages.json");
+
+// Initialize data directory and load existing data
+export const initializeStore = async () => {
+  try {
+    // Create data directory if it doesn't exist
+    await fs.mkdir(DATA_DIR, { recursive: true });
+
+    // Load existing conversations
+    try {
+      const conversationsData = await fs.readFile(CONVERSATIONS_FILE, "utf-8");
+      conversations = JSON.parse(conversationsData);
+      console.log(`[Store] Loaded ${Object.keys(conversations).length} conversations`);
+    } catch (e) {
+      console.log("[Store] No existing conversations found, starting fresh");
+    }
+
+    // Load existing messages
+    try {
+      const messagesData = await fs.readFile(MESSAGES_FILE, "utf-8");
+      messageStore = JSON.parse(messagesData);
+      console.log(`[Store] Loaded ${Object.keys(messageStore).length} message lists`);
+    } catch (e) {
+      console.log("[Store] No existing messages found, starting fresh");
+    }
+  } catch (error) {
+    console.error("[Store] Failed to initialize:", error.message);
+  }
+};
+
+// Save data to files
+const saveData = async () => {
+  try {
+    await fs.writeFile(CONVERSATIONS_FILE, JSON.stringify(conversations, null, 2));
+    await fs.writeFile(MESSAGES_FILE, JSON.stringify(messageStore, null, 2));
+  } catch (error) {
+    console.error("[Store] Failed to save data:", error.message);
+  }
+};
 
 // Create new conversation
 export const createConversation = (userId, courseCode, moduleName) => {
@@ -20,6 +65,8 @@ export const createConversation = (userId, courseCode, moduleName) => {
   messageStore[conversationId] = [];
 
   console.log(`[Store] Created conversation: ${conversationId}`);
+  saveData();
+
   return conversationId;
 };
 
@@ -58,6 +105,8 @@ export const addMessage = (conversationId, message, sender, tokens = null, respo
   }
 
   console.log(`[Store] Added message to ${conversationId}`);
+  saveData();
+
   return messageRecord;
 };
 
@@ -99,6 +148,7 @@ export const deleteConversation = (conversationId) => {
   delete conversations[conversationId];
   delete messageStore[conversationId];
   console.log(`[Store] Deleted conversation: ${conversationId}`);
+  saveData();
   return true;
 };
 
@@ -181,6 +231,7 @@ export const getConversationStats = (conversationId) => {
 };
 
 export default {
+  initializeStore,
   createConversation,
   getConversation,
   getUserConversations,
