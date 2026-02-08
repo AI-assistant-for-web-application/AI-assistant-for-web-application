@@ -272,6 +272,7 @@ app.post("/api/chat", async (req, res) => {
     }
 
     console.log(`[${new Date().toISOString()}] User: ${message}`);
+    console.log(`[${new Date().toISOString()}] Module: ${moduleKey || "default"}`);
 
     // Create or get conversation
     let convId = conversationId;
@@ -311,6 +312,7 @@ app.post("/api/chat", async (req, res) => {
       error: result.error || null,
       conversationId: convId,
       courseId: courseId || "general",
+      moduleKey : moduleKey || "default",
       timestamp: new Date(),
       tokens: result.tokens || null,
       quality: result.quality || null,
