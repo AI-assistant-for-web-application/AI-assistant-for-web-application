@@ -7,6 +7,7 @@ import {
   createConversation,
   getConversation,
   getUserConversations,
+  addMessage,
   getMessages,
   searchMessages,
   searchAllMessages,
@@ -258,10 +259,10 @@ app.get("/api/conversations/:conversationId/export/text", (req, res) => {
   }
 });
 
-// Chat endpoint
+// Chat endpoint (now stores messages)
 app.post("/api/chat", async (req, res) => {
   try {
-    const { message, courseId, context } = req.body;
+    const { message, courseId, context, conversationId, userId, moduleKey } = req.body;
 
     if (!message) {
       return res.status(400).json({
@@ -272,21 +273,48 @@ app.post("/api/chat", async (req, res) => {
 
     console.log(`[${new Date().toISOString()}] User: ${message}`);
 
-    const result = await callGroqAPI(message, context || "");
+    // Create or get conversation
+    let convId = conversationId;
+    if (!convId && userId) {
+      convId = createConversation(userId, courseId || "CS 229", "General");
+    }
+
+    // Store user message
+    if (convId) {
+      addMessage(convId, message, "user");
+    }
+
+    // Call Groq API with enhanced prompts
+    const result = await callGroqAPI(message, courseId || "CS 229", moduleKey || "default", context || "");
+
+    // Store assistant message
+    if (convId && result.success) {
+      addMessage(
+        convId,
+        result.message,
+        "assistant",
+        result.tokens,
+        result.responseTime
+      );
+    }
 
     if (result?.success) {
-      console.log(`[${new Date().toISOString()}] AI: ${result.message}`);
+      console.log(`[${new Date().toISOString()}] AI: ${result.message.substring(0, 100)}...`);
     } else {
       console.error(`[${new Date().toISOString()}] Error: ${result?.error}`);
     }
 
+    // Return response
     res.json({
       success: result.success,
       message: result.message,
       error: result.error || null,
+      conversationId: convId,
       courseId: courseId || "general",
       timestamp: new Date(),
       tokens: result.tokens || null,
+      quality: result.quality || null,
+      responseTime: result.responseTime,
     });
   } catch (error) {
     console.error("Server error:", error);
