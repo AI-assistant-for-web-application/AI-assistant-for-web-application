@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { callGroqAPI } from "./groq-client.js";
+import { initializeStore } from "./conversation-store.js";
 
 // Load environment variables
 dotenv.config();
@@ -12,6 +13,9 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Initialize conversation store
+await initializeStore();
 
 // =====================
 // Routes
@@ -45,13 +49,9 @@ app.post("/api/chat", async (req, res) => {
 
     // Log response
     if (result?.success) {
-      console.log(
-        `[${new Date().toISOString()}] AI: ${result.message}`
-      );
+      console.log(`[${new Date().toISOString()}] AI: ${result.message}`);
     } else {
-      console.error(
-        `[${new Date().toISOString()}] Error: ${result?.error}`
-      );
+      console.error(`[${new Date().toISOString()}] Error: ${result?.error}`);
     }
 
     // Return response
