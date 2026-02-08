@@ -177,6 +177,7 @@ export const exportConversationAsText = (conversationId) => {
     return null;
   }
 
+  // Format conversation details and messages into readable text
   let text = `Conversation: ${conversation.title}\n`;
   text += `Course: ${conversation.courseCode}\n`;
   text += `Module: ${conversation.moduleName}\n`;
@@ -184,6 +185,7 @@ export const exportConversationAsText = (conversationId) => {
   text += `Messages: ${conversation.messageCount}\n`;
   text += `\n${"=".repeat(60)}\n\n`;
 
+  // Format each message with sender, timestamp, and content
   messages.forEach((msg) => {
     const sender = msg.sender === "user" ? "You" : "Assistant";
     const time = new Date(msg.timestamp).toLocaleTimeString();
@@ -206,11 +208,13 @@ export const getConversationStats = (conversationId) => {
     return null;
   }
 
+  // Calculate statistics for user and assistant messages
   const userMessages = messages.filter((m) => m.sender === "user");
   const assistantMessages = messages.filter((m) => m.sender === "assistant");
   const totalTokens = assistantMessages.reduce((sum, msg) => sum + (msg.tokens?.total || 0), 0);
   const totalTime = assistantMessages.reduce((sum, msg) => sum + (msg.responseTime || 0), 0);
 
+  // Calculate average tokens and response time for assistant messages
   return {
     conversationId,
     title: conversation.title,
