@@ -177,6 +177,51 @@ export const getRelevantFollowUpQuestion = (moduleKey) => {
   return questions[Math.floor(Math.random() * questions.length)];
 };
 
+// Score response quality
+export const scoreResponseQuality = (response) => {
+  let score = 0;
+  const maxScore = 100;
+
+    if (response.length > 100 && response.length < 2000) {
+        score += 20;
+    }
+
+    // Criteria 2: Contains examples (good teaching practice)
+    if (response.toLowerCase().includes('example') || 
+        response.toLowerCase().includes('for instance') ||
+        response.toLowerCase().includes('such as')) {
+        score += 20;
+    }
+
+    // Criteria 3: Clarity (simple words and short sentences)
+    const sentences = response.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const words = response.split(/\s+/);
+    const avgSentenceLength = words.length / Math.max(sentences.length, 1);
+    
+    if (avgSentenceLength < 20) {
+        score += 20;
+    }
+
+    // Criteria 4: Technical accuracy (has specific ML terms)
+    const techTerms = [
+        'algorithm', 'model', 'data', 'training', 'testing',
+        'feature', 'parameter', 'prediction', 'classification', 'regression',
+        'accuracy', 'loss', 'optimization', 'gradient'
+    ];
+    const hasTechTerms = techTerms.some(term => response.toLowerCase().includes(term));
+    
+    if (hasTechTerms) {
+        score += 20;
+    }
+
+    // Criteria 5: Teaching approach (asks questions to engage student)
+    if (response.includes('?')) {
+        score += 20;
+    }
+
+    return Math.min(score, maxScore);
+};
+
 export default {
   getPromptTemplate,
   getAvailableModules,

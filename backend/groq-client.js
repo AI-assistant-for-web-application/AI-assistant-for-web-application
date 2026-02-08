@@ -1,9 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 import axios from "axios";
+
 import { 
   buildSystemPrompt,
   getRelevantFollowUpQuestion,
+  scoreResponseQuality,
 } from "./prompt-templates.js";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -15,6 +17,7 @@ let tokenStats = {
   totalPromptTokens: 0,
   totalCompletionTokens: 0,
   requestCount: 0,
+  totalQualityScore: 0,
 };
 
 // Get token statistics
@@ -24,6 +27,10 @@ export const getTokenStats = () => {
     averageTokensPerRequest:
       tokenStats.requestCount > 0
         ? Math.round(tokenStats.totalTokens / tokenStats.requestCount)
+        : 0,
+    averageQualityScore:
+      tokenStats.requestCount > 0
+        ? Math.round(tokenStats.totalQualityScore / tokenStats.requestCount)
         : 0,
   };
 };
@@ -36,6 +43,7 @@ export const resetTokenStats = () => {
     totalPromptTokens: 0,
     totalCompletionTokens: 0,
     requestCount: 0,
+    totalQualityScore : 0,
   };
 };
 
@@ -113,8 +121,18 @@ export const callGroqAPI = async (
     //Get follow-up question suggestion
     const followUpQuestions = getRelevantFollowUpQuestion(moduleKey);
 
+    // Score response quality
+    const qualityScore = scoreResponseQuality(assistantMessage);
+    
+    //Get follow-up question suggestion
+    const followUpQuestion = getRelevantFollowUpQuestion(moduleKey);
+
+    // Update token statistics
+    tokenStats.totalQualityScore += qualityScore;
+
+
     console.log(
-      `[Groq] ✓ Response received (${responseTime}ms) - Module: ${moduleKey} - Tokens: ${totalTokens}`
+      `[Groq] ✓ Response received (${responseTime}ms) - Module: ${moduleKey} - Tokens: ${totalTokens} - Quality: ${qualityScore}/100`
     );
 
     return {
@@ -127,6 +145,10 @@ export const callGroqAPI = async (
         total: totalTokens,
       },
       responseTime,
+      quality : {
+        score: qualityScore,
+        followUpQuestion: followUpQuestion,
+      },
       stats: getTokenStats(),
     };
   } catch (error) {
