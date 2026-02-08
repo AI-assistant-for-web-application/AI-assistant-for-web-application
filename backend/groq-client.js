@@ -35,9 +35,16 @@ export const resetTokenStats = () => {
 };
 
 export const callGroqAPI = async (userMessage, courseContext = "") => {
+  const startTime = performance.now();
+
   try {
     if (!GROQ_API_KEY) {
       throw new Error("GROQ_API_KEY not found in environment variables");
+    }
+
+    // Validate user message
+    if (!userMessage || userMessage.trim().length === 0) {
+      throw new Error("User message cannot be empty");
     }
 
     // Create system prompt with course context
@@ -46,7 +53,7 @@ You help students understand course concepts, answer questions about the materia
 Be concise but thorough in your responses.
 ${courseContext ? `Current course context: ${courseContext}` : ""}`;
 
-    // Make request to Groq API
+   // Make request to Groq API
     const response = await axios.post(
       GROQ_API_URL,
       {
@@ -69,8 +76,12 @@ ${courseContext ? `Current course context: ${courseContext}` : ""}`;
           Authorization: `Bearer ${GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
+        timeout: 30000, // 30 second timeout
       }
     );
+
+    const endTime = performance.now();
+    const responseTime = Math.round(endTime - startTime);
 
     // Extract response text
     const assistantMessage =
@@ -86,7 +97,9 @@ ${courseContext ? `Current course context: ${courseContext}` : ""}`;
     tokenStats.totalCompletionTokens += completionTokens;
     tokenStats.requestCount += 1;
 
-    console .log(`[Groq API] Prompt tokens: ${promptTokens}, Completion: ${completionTokens}, Total: ${totalTokens}`);
+    console.log(
+      `[Groq] ✓ Response received (${responseTime}ms) - Tokens: ${totalTokens} (Prompt: ${promptTokens}, Completion: ${completionTokens})`
+    );
 
     return {
       success: true,
@@ -97,16 +110,72 @@ ${courseContext ? `Current course context: ${courseContext}` : ""}`;
         completion: completionTokens,
         total: totalTokens,
       },
+      responseTime,
       stats: getTokenStats(),
     };
   } catch (error) {
-    console.error("Groq API Error:", error.message);
+    const endTime = performance.now();
+    const responseTime = Math.round(endTime - startTime);
+
+    // Determine error type and provide friendly message
+    let errorType = "unknown";
+    let friendlyMessage =
+      "Sorry, I encountered an error processing your request. Please try again.";
+
+    if (error instanceof axios.AxiosError) {
+      if (!error.response) {
+        // Network errors (no response received)
+        if (error.code === "ECONNABORTED") {
+          errorType = "timeout";
+          friendlyMessage =
+            "Request timeout: The server took too long to respond. Please try again.";
+        } else {
+          errorType = "network";
+          friendlyMessage =
+            "Network error: Cannot connect to Groq API. Please check your connection.";
+        }
+      } else {
+        // HTTP errors (response received with error status)
+        if (error.response.status === 401) {
+          errorType = "auth";
+          friendlyMessage =
+            "Authentication error: Invalid or expired API key. Please check your credentials.";
+        } else if (error.response.status === 429) {
+          errorType = "rate_limit";
+          friendlyMessage =
+            "Rate limit exceeded: Please wait a moment before trying again.";
+        } else if (error.response.status >= 500) {
+          errorType = "server";
+          friendlyMessage =
+            "Server error: Groq API is experiencing issues. Please try again later.";
+        } else if (error.response.status === 400) {
+          errorType = "validation";
+          friendlyMessage =
+            "Invalid request: Please check your input and try again.";
+        }
+      }
+    } else if (error instanceof Error) {
+      // Custom validation errors
+      if (error.message.includes("empty")) {
+        errorType = "validation";
+        friendlyMessage = "Validation error: " + error.message;
+      } else if (error.message.includes("API_KEY")) {
+        errorType = "config";
+        friendlyMessage = "Configuration error: " + error.message;
+      }
+    }
+
+    console.error(
+      `[Groq] ✗ Error (${errorType}) after ${responseTime}ms: ${error instanceof Error ? error.message : error}`
+    );
 
     return {
       success: false,
-      error: error.message,
-      message:
-        "Sorry, I encountered an error processing your request. Please try again.",
+      error: error instanceof Error ? error.message : String(error),
+      errorType,
+      message: friendlyMessage,
+      responseTime,
+      stats: getTokenStats(),
     };
   }
 };
