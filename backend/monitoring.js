@@ -60,3 +60,54 @@ export const trackRequest = (endpoint, method, statusCode, responseTime) => {
   }
 };
 
+// Get monitoring data
+export const getMonitoringData = () => {
+  const uptime = new Date() - monitoringData.startTime;
+  const averageResponseTime =
+    monitoringData.totalRequests > 0
+      ? Math.round(monitoringData.totalResponseTime / monitoringData.totalRequests)
+      : 0;
+
+  const successRate =
+    monitoringData.totalRequests > 0
+      ? Math.round((monitoringData.successfulRequests / monitoringData.totalRequests) * 100)
+      : 0;
+
+  // Calculate endpoint metrics
+  const endpoints = Object.entries(monitoringData.performanceMetrics).map(([key, data]) => ({
+    endpoint: key,
+    calls: data.calls,
+    averageTime: Math.round(data.totalTime / data.calls),
+    errors: data.errors,
+    errorRate: Math.round((data.errors / data.calls) * 100),
+  }));
+
+  return {
+    uptime: Math.round(uptime / 1000), // seconds
+    totalRequests: monitoringData.totalRequests,
+    successfulRequests: monitoringData.successfulRequests,
+    failedRequests: monitoringData.failedRequests,
+    successRate,
+    averageResponseTime,
+    recentErrors: monitoringData.errors.slice(-10),
+    endpoints: endpoints.sort((a, b) => b.calls - a.calls),
+  };
+};
+
+// Health check
+export const healthCheck = async () => {
+  const health = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: Math.round((new Date() - monitoringData.startTime) / 1000),
+    metrics: {
+      totalRequests: monitoringData.totalRequests,
+      successRate: monitoringData.totalRequests > 0
+        ? Math.round((monitoringData.successfulRequests / monitoringData.totalRequests) * 100)
+        : 0,
+      averageResponseTime: monitoringData.totalRequests > 0
+        ? Math.round(monitoringData.totalResponseTime / monitoringData.totalRequests)
+        : 0,
+      recentErrors: monitoringData.errors.length,
+    },
+  };
