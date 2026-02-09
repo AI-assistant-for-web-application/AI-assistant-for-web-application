@@ -2,6 +2,12 @@ import dotenv from "dotenv";
 dotenv.config();
 import axios from "axios";
 
+import { 
+  buildSystemPrompt,
+  getRelevantFollowUpQuestion,
+  scoreResponseQuality,
+} from "./prompt-templates.js";
+
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -11,6 +17,7 @@ let tokenStats = {
   totalPromptTokens: 0,
   totalCompletionTokens: 0,
   requestCount: 0,
+  totalQualityScore: 0,
 };
 
 // Get token statistics
@@ -21,8 +28,13 @@ export const getTokenStats = () => {
       tokenStats.requestCount > 0
         ? Math.round(tokenStats.totalTokens / tokenStats.requestCount)
         : 0,
+    averageQualityScore:
+      tokenStats.requestCount > 0
+        ? Math.round(tokenStats.totalQualityScore / tokenStats.requestCount)
+        : 0,
   };
 };
+
 
 // Reset token statistics
 export const resetTokenStats = () => {
@@ -31,10 +43,17 @@ export const resetTokenStats = () => {
     totalPromptTokens: 0,
     totalCompletionTokens: 0,
     requestCount: 0,
+    totalQualityScore : 0,
   };
 };
 
-export const callGroqAPI = async (userMessage, courseContext = "") => {
+
+export const callGroqAPI = async (
+  userMessage,
+  courseCode = "CS 229",
+  moduleKey = "default", 
+  courseContext = ""
+) => {
   const startTime = performance.now();
 
   try {
@@ -47,11 +66,12 @@ export const callGroqAPI = async (userMessage, courseContext = "") => {
       throw new Error("User message cannot be empty");
     }
 
-    // Create system prompt with course context
-    const systemPrompt = `You are a helpful course assistant for students. 
-You help students understand course concepts, answer questions about the material, and provide explanations.
-Be concise but thorough in your responses.
-${courseContext ? `Current course context: ${courseContext}` : ""}`;
+    // Build enhance system prompt from template
+    const systemPrompt = buildSystemPrompt(courseCode, moduleKey, courseContext);
+
+    console.log(
+      `[Groq] Processing message for ${courseCode} - ${moduleKey}: "${userMessage.substring(0, 50)}..."`
+    )
 
    // Make request to Groq API
     const response = await axios.post(
@@ -97,8 +117,22 @@ ${courseContext ? `Current course context: ${courseContext}` : ""}`;
     tokenStats.totalCompletionTokens += completionTokens;
     tokenStats.requestCount += 1;
 
+
+    //Get follow-up question suggestion
+    const followUpQuestions = getRelevantFollowUpQuestion(moduleKey);
+
+    // Score response quality
+    const qualityScore = scoreResponseQuality(assistantMessage);
+    
+    //Get follow-up question suggestion
+    const followUpQuestion = getRelevantFollowUpQuestion(moduleKey);
+
+    // Update token statistics
+    tokenStats.totalQualityScore += qualityScore;
+
+
     console.log(
-      `[Groq] ✓ Response received (${responseTime}ms) - Tokens: ${totalTokens} (Prompt: ${promptTokens}, Completion: ${completionTokens})`
+      `[Groq] ✓ Response received (${responseTime}ms) - Module: ${moduleKey} - Tokens: ${totalTokens} - Quality: ${qualityScore}/100`
     );
 
     return {
@@ -111,6 +145,10 @@ ${courseContext ? `Current course context: ${courseContext}` : ""}`;
         total: totalTokens,
       },
       responseTime,
+      quality : {
+        score: qualityScore,
+        followUpQuestion: followUpQuestion,
+      },
       stats: getTokenStats(),
     };
   } catch (error) {
