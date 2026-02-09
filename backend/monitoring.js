@@ -111,3 +111,32 @@ export const healthCheck = async () => {
       recentErrors: monitoringData.errors.length,
     },
   };
+
+   // Determine health status
+  if (monitoringData.failedRequests > 10 || monitoringData.errors.length > 50) {
+    health.status = 'degraded';
+  }
+
+  return health;
+};
+
+// Reset monitoring (for testing)
+export const resetMonitoring = () => {
+  monitoringData = {
+    totalRequests: 0,
+    successfulRequests: 0,
+    failedRequests: 0,
+    totalResponseTime: 0,
+    errors: [],
+    performanceMetrics: {},
+    startTime: new Date(),
+  };
+};
+
+export default {
+  logError,
+  trackRequest,
+  getMonitoringData,
+  healthCheck,
+  resetMonitoring,
+};
