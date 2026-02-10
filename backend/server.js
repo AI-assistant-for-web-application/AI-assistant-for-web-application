@@ -561,5 +561,7 @@ app.listen(PORT, () => {
   console.log(`\n✓ Server running on http://localhost:${PORT}`);
   console.log(`✓ API endpoint: POST http://localhost:${PORT}/api/chat`);
   console.log(`✓ Health check: GET http://localhost:${PORT}/health`);
+  console.log(`✓ Monitoring JSON: GET http://localhost:${PORT}/api/monitoring`);
+   console.log(`✓ Dashboard: GET http://localhost:${PORT}/dashboard`);
   console.log(`✓ Conversations: GET http://localhost:${PORT}/api/conversations/user/:userId\n`);
 });
