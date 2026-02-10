@@ -17,6 +17,14 @@ import {
   getConversationStats,
 } from "./conversation-store.js";
 
+//  Monitoring imports
+import {
+  logError,
+  trackRequest,
+  getMonitoringData,
+  healthCheck,
+} from "./monitoring.js";
+
 // Load environment variables
 dotenv.config();
 
@@ -27,6 +35,19 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Monitoring middleware (tracks every request)
+app.use((req, res, next) => {
+  const startTime = Date.now();
+
+  res.on("finish", () => {
+    const duration = Date.now() - startTime;
+    trackRequest(req.path, req.method, res.statusCode, duration);
+  });
+
+  next();
+});
+
+
 // Initialize conversation store
 await initializeStore();
 
@@ -34,13 +55,172 @@ await initializeStore();
 // Routes
 // =====================
 
-// Health check
-app.get("/health", (req, res) => {
-  res.json({
-    status: "Backend is running!",
-    timestamp: new Date(),
-  });
+// Health check (with monitoring)
+app.get("/health", async (req, res) => {
+  try {
+    const health = await healthCheck();
+    res.status(health.status === "healthy" ? 200 : 503).json(health);
+  } catch (error) {
+    logError("HEALTH_CHECK_FAILED", error?.message || "Unknown error");
+    res.status(500).json({
+      status: "error",
+      message: "Health check failed",
+    });
+  }
 });
+
+// Monitoring data endpoint (JSON)
+app.get("/api/monitoring", (req, res) => {
+  try {
+    const data = getMonitoringData();
+    res.json({
+      success: true,
+      monitoring: data,
+    });
+  } catch (error) {
+    logError("MONITORING_ERROR", error?.message || "Unknown error");
+    res.status(500).json({
+      success: false,
+      error: "Failed to get monitoring data",
+    });
+  }
+});
+
+// Monitoring dashboard (HTML)
+app.get("/dashboard", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>API Monitoring Dashboard</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        h1 { color: #333; }
+        .metric {
+          background: white;
+          padding: 15px;
+          margin: 10px 0;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric-label {
+          font-size: 12px;
+          color: #666;
+          margin-bottom: 5px;
+        }
+        .metric-value {
+          font-size: 28px;
+          font-weight: bold;
+          color: #2563eb;
+        }
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 15px;
+        }
+        .endpoints {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          margin-top: 20px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+          text-align: left;
+          padding: 10px;
+          border-bottom: 1px solid #eee;
+        }
+        th { background-color: #f9fafb; font-weight: bold; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+      </style>
+      <script>
+        async function updateDashboard() {
+          try {
+            const response = await fetch('/api/monitoring');
+            const data = await response.json();
+            const m = data.monitoring;
+
+            document.getElementById('uptime').textContent = m.uptime + 's';
+            document.getElementById('requests').textContent = m.totalRequests;
+            document.getElementById('successRate').textContent = m.successRate + '%';
+            document.getElementById('avgTime').textContent = m.averageResponseTime + 'ms';
+            document.getElementById('errors').textContent = m.recentErrors.length;
+
+            let endpointHtml = '';
+            m.endpoints.forEach(ep => {
+              endpointHtml += \`
+                <tr>
+                  <td>\${ep.endpoint}</td>
+                  <td>\${ep.calls}</td>
+                  <td>\${ep.averageTime}ms</td>
+                  <td class="\${ep.errors > 0 ? 'error' : 'success'}">\${ep.errorRate}%</td>
+                </tr>
+              \`;
+            });
+            document.getElementById('endpoints').innerHTML = endpointHtml;
+          } catch (error) {
+            console.error('Failed to update dashboard:', error);
+          }
+        }
+
+        updateDashboard();
+        setInterval(updateDashboard, 5000);
+      </script>
+    </head>
+    <body>
+      <h1>API Monitoring Dashboard</h1>
+
+      <div class="grid">
+        <div class="metric">
+          <div class="metric-label">Uptime</div>
+          <div class="metric-value" id="uptime">0s</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Total Requests</div>
+          <div class="metric-value" id="requests">0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Success Rate</div>
+          <div class="metric-value" id="successRate">0%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Avg Response Time</div>
+          <div class="metric-value" id="avgTime">0ms</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Recent Errors</div>
+          <div class="metric-value error" id="errors">0</div>
+        </div>
+      </div>
+
+      <div class="endpoints">
+        <h2>Endpoint Performance</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Endpoint</th>
+              <th>Calls</th>
+              <th>Avg Time</th>
+              <th>Error Rate</th>
+            </tr>
+          </thead>
+          <tbody id="endpoints"></tbody>
+        </table>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
+
 
 // Create new conversation
 app.post("/api/conversations", (req, res) => {
@@ -322,6 +502,13 @@ app.post("/api/chat", async (req, res) => {
     });
   } catch (error) {
     console.error("Server error:", error);
+   
+     //  Log error to monitoring
+    logError("CHAT_ENDPOINT_ERROR", error?.message || "Unknown error", {
+      userId: req.body?.userId,
+      endpoint: "/api/chat",
+    });
+
     res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -374,5 +561,7 @@ app.listen(PORT, () => {
   console.log(`\n✓ Server running on http://localhost:${PORT}`);
   console.log(`✓ API endpoint: POST http://localhost:${PORT}/api/chat`);
   console.log(`✓ Health check: GET http://localhost:${PORT}/health`);
+  console.log(`✓ Monitoring JSON: GET http://localhost:${PORT}/api/monitoring`);
+   console.log(`✓ Dashboard: GET http://localhost:${PORT}/dashboard`);
   console.log(`✓ Conversations: GET http://localhost:${PORT}/api/conversations/user/:userId\n`);
 });
