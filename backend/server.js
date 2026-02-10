@@ -17,6 +17,14 @@ import {
   getConversationStats,
 } from "./conversation-store.js";
 
+//  Monitoring imports
+import {
+  logError,
+  trackRequest,
+  getMonitoringData,
+  healthCheck,
+} from "./monitoring.js";
+
 // Load environment variables
 dotenv.config();
 
