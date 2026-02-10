@@ -35,6 +35,19 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Monitoring middleware (tracks every request)
+app.use((req, res, next) => {
+  const startTime = Date.now();
+
+  res.on("finish", () => {
+    const duration = Date.now() - startTime;
+    trackRequest(req.path, req.method, res.statusCode, duration);
+  });
+
+  next();
+});
+
+
 // Initialize conversation store
 await initializeStore();
 
