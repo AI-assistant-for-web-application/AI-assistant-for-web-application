@@ -502,6 +502,13 @@ app.post("/api/chat", async (req, res) => {
     });
   } catch (error) {
     console.error("Server error:", error);
+   
+     //  Log error to monitoring
+    logError("CHAT_ENDPOINT_ERROR", error?.message || "Unknown error", {
+      userId: req.body?.userId,
+      endpoint: "/api/chat",
+    });
+
     res.status(500).json({
       success: false,
       error: "Internal server error",
