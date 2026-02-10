@@ -55,13 +55,20 @@ await initializeStore();
 // Routes
 // =====================
 
-// Health check
-app.get("/health", (req, res) => {
-  res.json({
-    status: "Backend is running!",
-    timestamp: new Date(),
-  });
+// Health check (with monitoring)
+app.get("/health", async (req, res) => {
+  try {
+    const health = await healthCheck();
+    res.status(health.status === "healthy" ? 200 : 503).json(health);
+  } catch (error) {
+    logError("HEALTH_CHECK_FAILED", error?.message || "Unknown error");
+    res.status(500).json({
+      status: "error",
+      message: "Health check failed",
+    });
+  }
 });
+
 
 // Create new conversation
 app.post("/api/conversations", (req, res) => {
