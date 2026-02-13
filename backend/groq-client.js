@@ -6,8 +6,10 @@ import {
   buildSystemPrompt,
   getRelevantFollowUpQuestion,
   scoreResponseQuality,
+  generateQualityFeedback,
 } from "./prompt-templates.js";
 
+/* global process */
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -121,19 +123,22 @@ export const callGroqAPI = async (
     //Get follow-up question suggestion
     const followUpQuestions = getRelevantFollowUpQuestion(moduleKey);
 
-    // Score response quality
-    const qualityScore = scoreResponseQuality(assistantMessage);
-    
-    //Get follow-up question suggestion
+    // Score response quality (now returns detailed object)
+    const qualityResult = scoreResponseQuality(assistantMessage);
+
+    // Generate quality feedback
+    const qualityFeedback = generateQualityFeedback(qualityResult);
+
+    // Get follow-up question suggestion
     const followUpQuestion = getRelevantFollowUpQuestion(moduleKey);
 
     // Update token statistics
-    tokenStats.totalQualityScore += qualityScore;
-
+    tokenStats.totalQualityScore += qualityResult.overall;
 
     console.log(
-      `[Groq] ✓ Response received (${responseTime}ms) - Module: ${moduleKey} - Tokens: ${totalTokens} - Quality: ${qualityScore}/100`
+      `[Groq] ✓ Response received (${responseTime}ms) - Module: ${moduleKey} - Tokens: ${totalTokens} - Quality: ${qualityResult.overall}/100`
     );
+    console.log(`[Groq]   Dimensions: C:${qualityResult.dimensions.clarity} Co:${qualityResult.dimensions.completeness} A:${qualityResult.dimensions.accuracy} E:${qualityResult.dimensions.engagement} P:${qualityResult.dimensions.pedagogy}`);
 
     return {
       success: true,
@@ -145,8 +150,11 @@ export const callGroqAPI = async (
         total: totalTokens,
       },
       responseTime,
-      quality : {
-        score: qualityScore,
+      quality: {
+        score: qualityResult.overall,
+        dimensions: qualityResult.dimensions,
+        breakdown: qualityResult.breakdown,
+        feedback: qualityFeedback,
         followUpQuestion: followUpQuestion,
       },
       stats: getTokenStats(),
