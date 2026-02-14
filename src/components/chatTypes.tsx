@@ -4,17 +4,18 @@ export interface Message {
   sender: 'user' | 'assistant';
   timestamp: Date;
   metadata?: {
-    responseTime?: number;
-    tokens?: {
-      prompt: number;
-      completion: number;
-      total: number;
-    };
-    quality?: {
-      score: number;
-      followUpQuestion?: string;
-    };
+  responseTime?: number;
+  tokens?: {
+    prompt: number;
+    completion: number;
+    total: number;
   };
+  quality?: {
+    score: number;
+    followUpQuestion?: string;
+  };
+  isBlocked?: boolean;
+};
   error?: {
     type: string;
     message: string;
