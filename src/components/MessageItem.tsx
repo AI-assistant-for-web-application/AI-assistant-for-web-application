@@ -64,6 +64,13 @@ const MessageItem = ({ message, copiedMessageId, onCopy, onRetry, isLoading, for
           )}
         </div>
       )}
+
+      {message.metadata?.isBlocked && (
+        <div className="blocked-indicator">
+          <AlertCircle size={14} />
+          <span>Off-topic question - Answer blocked</span>
+        </div>
+      )}
     </div>
   );
 };
