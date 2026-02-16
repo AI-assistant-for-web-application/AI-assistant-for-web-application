@@ -1,9 +1,18 @@
 // Prompt templates for different course modules
 const promptTemplates = {
-  // Module 1: Supervised Learning Basics
   supervisedLearning: {
     systemPrompt: `You are an expert course assistant for "Introduction to Machine Learning".
 The student is currently learning about Supervised Learning.
+
+IMPORTANT: Only answer questions directly about Machine Learning concepts.
+If the question is NOT about Machine Learning or this course, respond with:
+"I'm sorry, I can only help with questions about Machine Learning concepts. Please ask about supervised learning, regression, classification, or other ML topics."
+
+Do NOT answer questions about:
+- General knowledge (weather, history, geography)
+- Other subjects
+- Course logistics (exams, deadlines, grades)
+- Off-topic conversation
 
 Key concepts to reinforce:
 - Labeled training data
@@ -25,10 +34,19 @@ Guidelines:
     ]
   },
 
-  // Module 2: Regression Analysis
   regression: {
     systemPrompt: `You are an expert course assistant for "Introduction to Machine Learning".
 The student is currently learning about Regression Analysis.
+
+IMPORTANT: Only answer questions directly about Machine Learning concepts.
+If the question is NOT about Machine Learning or this course, respond with:
+"I'm sorry, I can only help with questions about Machine Learning concepts. Please ask about regression, linear models, optimization, or other ML topics."
+
+Do NOT answer questions about:
+- General knowledge
+- Other subjects
+- Course logistics
+- Off-topic conversation
 
 Key concepts to reinforce:
 - Linear regression
@@ -50,10 +68,19 @@ Guidelines:
     ]
   },
 
-  // Module 3: Classification Algorithms
   classification: {
     systemPrompt: `You are an expert course assistant for "Introduction to Machine Learning".
 The student is currently learning about Classification Algorithms.
+
+IMPORTANT: Only answer questions directly about Machine Learning concepts.
+If the question is NOT about Machine Learning or this course, respond with:
+"I'm sorry, I can only help with questions about Machine Learning concepts. Please ask about classification, logistic regression, metrics, or other ML topics."
+
+Do NOT answer questions about:
+- General knowledge
+- Other subjects
+- Course logistics
+- Off-topic conversation
 
 Key concepts to reinforce:
 - Logistic regression
@@ -75,10 +102,19 @@ Guidelines:
     ]
   },
 
-  // Module 4: Model Evaluation
   evaluation: {
     systemPrompt: `You are an expert course assistant for "Introduction to Machine Learning".
 The student is currently learning about Model Evaluation Metrics.
+
+IMPORTANT: Only answer questions directly about Machine Learning concepts.
+If the question is NOT about Machine Learning or this course, respond with:
+"I'm sorry, I can only help with questions about Machine Learning concepts. Please ask about evaluation metrics, validation, cross-validation, or other ML topics."
+
+Do NOT answer questions about:
+- General knowledge
+- Other subjects
+- Course logistics
+- Off-topic conversation
 
 Key concepts to reinforce:
 - Train/validation/test splits
@@ -100,10 +136,19 @@ Guidelines:
     ]
   },
 
-  // Module 5: Regularization
   regularization: {
     systemPrompt: `You are an expert course assistant for "Introduction to Machine Learning".
 The student is currently learning about Regularization Techniques.
+
+IMPORTANT: Only answer questions directly about Machine Learning concepts.
+If the question is NOT about Machine Learning or this course, respond with:
+"I'm sorry, I can only help with questions about Machine Learning concepts. Please ask about regularization, L1/L2, overfitting, or other ML topics."
+
+Do NOT answer questions about:
+- General knowledge
+- Other subjects
+- Course logistics
+- Off-topic conversation
 
 Key concepts to reinforce:
 - L1 and L2 regularization
@@ -125,12 +170,20 @@ Guidelines:
     ]
   },
 
-  // Default/General
   default: {
     systemPrompt: `You are a helpful course assistant for "Introduction to Machine Learning".
-Help students understand machine learning concepts, answer questions about course material,
-and provide clear explanations with practical examples.
 
+IMPORTANT: Only answer questions directly about Machine Learning concepts.
+If the question is NOT about Machine Learning or this course, respond with:
+"I'm sorry, I can only help with questions about Machine Learning concepts. Please ask about supervised learning, algorithms, evaluation, or other ML topics."
+
+Do NOT answer questions about:
+- General knowledge (weather, history, geography, etc.)
+- Other subjects
+- Course logistics (exams, deadlines, grades)
+- Off-topic conversation (jokes, entertainment, etc.)
+
+Help students understand machine learning concepts with clear explanations and practical examples.
 Be concise but thorough. Encourage learning and critical thinking.`,
     
     followUpQuestions: [
@@ -171,18 +224,14 @@ const qualityDimensions = {
   }
 };
 
-
-// Get prompt template by module
 export const getPromptTemplate = (moduleKey) => {
   return promptTemplates[moduleKey] || promptTemplates.default;
 };
 
-// Get all available modules
 export const getAvailableModules = () => {
   return Object.keys(promptTemplates).filter(key => key !== 'default');
 };
 
-// Build comprehensive system prompt
 export const buildSystemPrompt = (courseCode, moduleKey, courseContext) => {
   const template = getPromptTemplate(moduleKey);
   
@@ -194,7 +243,6 @@ ${courseContext ? `Student Context: ${courseContext}` : ''}
 Remember: Be supportive, clear, and educational. Adapt to the student's level.`;
 };
 
-// Get a random follow-up question for a module
 export const getRelevantFollowUpQuestion = (moduleKey) => {
   const template = getPromptTemplate(moduleKey);
   const questions = template.followUpQuestions;
@@ -203,28 +251,24 @@ export const getRelevantFollowUpQuestion = (moduleKey) => {
     return null;
   }
 
-  // Return random question for variety
   return questions[Math.floor(Math.random() * questions.length)];
 };
 
-// Enhanced response quality scoring with dimensions
 export const scoreResponseQuality = (response) => {
   const scores = {};
   
-  // 1. CLARITY SCORE (0-100)
   let clarityScore = 0;
-  
   const sentences = response.split(/[.!?]+/).filter(s => s.trim().length > 0);
   const avgSentenceLength = response.split(/\s+/).length / Math.max(sentences.length, 1);
   
-  if (sentences.length >= 3) clarityScore += 20; // Has multiple sentences
-  if (avgSentenceLength < 25) clarityScore += 20; // Sentences not too long
-  if (avgSentenceLength > 8) clarityScore += 10; // Sentences not too short
-  if (response.includes('\n') || response.includes(':')) clarityScore += 15; // Has structure
+  if (sentences.length >= 3) clarityScore += 20;
+  if (avgSentenceLength < 25) clarityScore += 20;
+  if (avgSentenceLength > 8) clarityScore += 10;
+  if (response.includes('\n') || response.includes(':')) clarityScore += 15;
   
   const complexWords = response.split(/\s+/).filter(w => w.length > 12).length;
   const totalWords = response.split(/\s+/).length;
-  if (complexWords / totalWords < 0.15) clarityScore += 20; // Not overly complex
+  if (complexWords / totalWords < 0.15) clarityScore += 20;
   
   if (response.toLowerCase().includes('means') || 
       response.toLowerCase().includes('in other words') ||
@@ -232,13 +276,10 @@ export const scoreResponseQuality = (response) => {
   
   scores.clarity = Math.min(clarityScore, 100);
   
-  
-  // 2. COMPLETENESS SCORE (0-100)
   let completenessScore = 0;
-  
   if (response.length > 150) completenessScore += 20;
   if (response.length > 400) completenessScore += 15;
-  if (response.length < 2000) completenessScore += 10; // Not too long
+  if (response.length < 2000) completenessScore += 10;
   
   if (response.toLowerCase().includes('example') ||
       response.toLowerCase().includes('for instance') ||
@@ -258,10 +299,7 @@ export const scoreResponseQuality = (response) => {
   
   scores.completeness = Math.min(completenessScore, 100);
   
-  
-  // 3. ACCURACY SCORE (0-100)
   let accuracyScore = 0;
-  
   const mlTerms = [
     'algorithm', 'model', 'data', 'training', 'testing',
     'feature', 'parameter', 'prediction', 'classification', 'regression',
@@ -283,10 +321,7 @@ export const scoreResponseQuality = (response) => {
   
   scores.accuracy = Math.max(0, Math.min(accuracyScore, 100));
   
-  
-  // 4. ENGAGEMENT SCORE (0-100)
   let engagementScore = 0;
-  
   const questionMarks = (response.match(/\?/g) || []).length;
   engagementScore += Math.min(questionMarks * 15, 30);
   
@@ -298,10 +333,7 @@ export const scoreResponseQuality = (response) => {
   
   scores.engagement = Math.min(engagementScore, 100);
   
-  
-  // 5. PEDAGOGY SCORE (0-100)
   let pedagogyScore = 0;
-  
   if (/first|second|third|next|then|finally/i.test(response)) pedagogyScore += 20;
   if (/like|similar to|think of it as|imagine|analogy/i.test(response)) pedagogyScore += 20;
   if (/remember|as we|previously|earlier|you learned/i.test(response)) pedagogyScore += 15;
@@ -311,8 +343,6 @@ export const scoreResponseQuality = (response) => {
   
   scores.pedagogy = Math.min(pedagogyScore, 100);
   
-  
-  // CALCULATE WEIGHTED OVERALL SCORE
   const overallScore = Math.round(
     scores.clarity * qualityDimensions.clarity.weight +
     scores.completeness * qualityDimensions.completeness.weight +
@@ -334,7 +364,6 @@ export const scoreResponseQuality = (response) => {
   };
 };
 
-// Generate human-readable feedback from quality scores
 export const generateQualityFeedback = (qualityResult) => {
   const feedback = [];
   const { dimensions } = qualityResult;
@@ -344,7 +373,7 @@ export const generateQualityFeedback = (qualityResult) => {
   } else if (dimensions.clarity >= 60) {
     feedback.push("→ Good clarity but could be simpler");
   } else {
-    feedback.push("✗ Needs improvement in clarity, use shorter sentences");
+    feedback.push("✗ Needs improvement in clarity");
   }
   
   if (dimensions.completeness >= 80) {
@@ -352,15 +381,15 @@ export const generateQualityFeedback = (qualityResult) => {
   } else if (dimensions.completeness >= 60) {
     feedback.push("→ Adequate but could include more examples");
   } else {
-    feedback.push("✗ Incomplete, add more details and examples");
+    feedback.push("✗ Incomplete, add more details");
   }
   
   if (dimensions.accuracy >= 80) {
     feedback.push("✓ Strong technical accuracy");
   } else if (dimensions.accuracy >= 60) {
-    feedback.push("→ Mostly accurate but needs more technical terms");
+    feedback.push("→ Mostly accurate");
   } else {
-    feedback.push("✗ Lacks technical precision");
+    feedback.push("✗ Needs more technical precision");
   }
   
   if (dimensions.engagement >= 70) {
@@ -368,15 +397,15 @@ export const generateQualityFeedback = (qualityResult) => {
   } else if (dimensions.engagement >= 50) {
     feedback.push("→ Could be more engaging");
   } else {
-    feedback.push("✗ Add questions or real-world examples");
+    feedback.push("✗ Add more examples");
   }
   
   if (dimensions.pedagogy >= 70) {
     feedback.push("✓ Good teaching approach");
   } else if (dimensions.pedagogy >= 50) {
-    feedback.push("→ Add more scaffolding or analogies");
+    feedback.push("→ Add more scaffolding");
   } else {
-    feedback.push("✗ Needs better pedagogical structure");
+    feedback.push("✗ Improve pedagogical approach");
   }
   
   return feedback;
